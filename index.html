@@ -74,6 +74,40 @@
           box-shadow: 0 0 8px #fff;
         }
       }
+
+      /* Nút điều khiển Bật/Tắt nhạc */
+      #music-btn {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 100;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 182, 213, 0.4);
+        color: #fff;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer !important;
+        box-shadow: 0 0 15px rgba(255, 61, 132, 0.4);
+        transition: transform 0.3s, background 0.3s;
+      }
+      #music-btn:hover {
+        transform: scale(1.1);
+        background: rgba(255, 255, 255, 0.25);
+      }
+      #music-btn.playing {
+        animation: rotate 4s linear infinite;
+      }
+      @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+
       #stage {
         position: fixed;
         inset: 0;
@@ -444,6 +478,10 @@
     <div class="glow g1"></div>
     <div class="glow g2"></div>
 
+    <!-- Thẻ phát nhạc ẩn & Nút đĩa nhạc xoay -->
+    <audio id="bg-music" loop src="nhac.mp3.mp3"></audio>
+    <button id="music-btn" title="Bật/Tắt Nhạc">🎵</button>
+
     <div id="stage">
       <div class="line l1" id="l1"></div>
       <div class="line l2" id="l2"></div>
@@ -499,6 +537,40 @@
         s.style.cssText = `left:${R(0, 100)}vw;top:${R(0, 100)}vh;animation-delay:${R(0, 3)}s`;
         document.body.appendChild(s);
       }
+
+      // Xử lý âm thanh
+      const music = $("bg-music");
+      const musicBtn = $("music-btn");
+      let isPlaying = false;
+
+      function playMusic() {
+        if (!isPlaying) {
+          music.play().then(() => {
+            isPlaying = true;
+            musicBtn.classList.add("playing");
+            musicBtn.textContent = "🎵";
+          }).catch((err) => console.log("Lỗi phát nhạc:", err));
+        }
+      }
+
+      function toggleMusic() {
+        if (isPlaying) {
+          music.pause();
+          musicBtn.classList.remove("playing");
+          musicBtn.textContent = "🔇";
+        } else {
+          music.play().then(() => {
+            musicBtn.classList.add("playing");
+            musicBtn.textContent = "🎵";
+          }).catch(() => {});
+        }
+        isPlaying = !isPlaying;
+      }
+
+      musicBtn.onclick = (e) => {
+        e.stopPropagation();
+        toggleMusic();
+      };
 
       $("name").textContent = CFG.name;
       $("sign").textContent = CFG.sign;
@@ -624,6 +696,7 @@
       );
 
       function decode() {
+        playMusic(); // Tự động bật nhạc ngay khi nhấn Giải mã
         if (decoding) return;
         decoding = true;
         $("btn").style.display = "none";
@@ -750,5 +823,5 @@
         }
       });
     </script>
-    </body>
+  </body>
 </html>
